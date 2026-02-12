@@ -13,7 +13,9 @@
     "test:e2e": "playwright test",
     "prisma:generate": "bun --env-file=.env.local prisma generate",
     "prisma:migrate:dev": "bun --env-file=.env.local prisma migrate dev",
-    "prisma:migrate:deploy": "bun --env-file=.env.local prisma migrate deploy"
+    "prisma:migrate:deploy": "bun --env-file=.env.local prisma migrate deploy",
+    "prisma:migrate:status": "bun --env-file=.env.local prisma migrate status",
+    "prisma:studio": "bun --env-file=.env.local prisma studio"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.15.0",

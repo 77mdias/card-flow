@@ -9,6 +9,7 @@ const testDefaults: Partial<AppEnv> = {
   AUTH0_CLIENT_SECRET: "test-client-secret",
   AUTH0_SECRET: "0123456789abcdef0123456789abcdef",
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/cardflow_test",
+  DIRECT_URL: "postgresql://postgres:postgres@localhost:5432/cardflow_test",
 };
 
 const rawEnv = process.env.NODE_ENV === "test" ? { ...testDefaults, ...process.env } : process.env;

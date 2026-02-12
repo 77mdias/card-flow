@@ -30,6 +30,17 @@ intermitentes em comandos do Prisma (`migrate`, `status`, `studio`), por exemplo
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require&channel_binding=require&connect_timeout=15"
 ```
 
+Para maior robustez, configure tambem `DIRECT_URL` (host direto, sem pooler) para
+comandos administrativos do Prisma:
+
+```env
+DIRECT_URL="postgresql://USER:PASSWORD@HOST-DIRECT:5432/DATABASE?sslmode=require&connect_timeout=15"
+```
+
+Convencao usada no projeto:
+- `DATABASE_URL`: runtime da aplicacao (queries do Prisma Client em requests).
+- `DIRECT_URL`: migrations e comandos admin (`migrate`, `status`, `studio`).
+
 3. Gere o client do Prisma:
 
 ```bash
@@ -60,6 +71,8 @@ bun run dev
 - `bun run prisma:generate`: gera Prisma Client
 - `bun run prisma:migrate:dev`: cria/aplica migration local
 - `bun run prisma:migrate:deploy`: aplica migration em ambiente alvo
+- `bun run prisma:migrate:status`: status das migrations no banco alvo
+- `bun run prisma:studio`: abre Prisma Studio
 
 ## Fluxo de autenticacao
 

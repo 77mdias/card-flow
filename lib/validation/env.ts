@@ -8,6 +8,7 @@ export const envSchema = z.object({
   AUTH0_CLIENT_SECRET: z.string().min(1),
   AUTH0_SECRET: z.string().min(32),
   DATABASE_URL: z.string().url(),
+  DIRECT_URL: z.string().url().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;
