@@ -16,6 +16,7 @@ export interface UpsertUserFromAuthInput {
 
 export interface UsersRepository {
   upsertFromAuthIdentity(input: UpsertUserFromAuthInput): Promise<AppUserDto>;
+  deleteByAuthSubject(authSubject: string): Promise<{ deletedCount: number }>;
 }
 
 function mapUserEntity(user: User): AppUserDto {
@@ -50,6 +51,18 @@ export class PrismaUsersRepository implements UsersRepository {
     });
 
     return mapUserEntity(user);
+  }
+
+  async deleteByAuthSubject(authSubject: string): Promise<{ deletedCount: number }> {
+    const result = await prisma.user.deleteMany({
+      where: {
+        authSubject,
+      },
+    });
+
+    return {
+      deletedCount: result.count,
+    };
   }
 }
 

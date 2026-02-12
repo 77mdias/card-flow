@@ -2,13 +2,13 @@ import Link from "next/link";
 import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { auth0 } from "@/lib/auth0";
+import { getServerAuthSession } from "@/lib/auth-session";
 import { authService } from "@/server/services/auth-service";
 
 export default async function DashboardPage() {
   noStore();
 
-  const session = await auth0.getSession();
+  const session = await getServerAuthSession();
   const authResult = await authService.synchronizeFromSession(session);
 
   if (!authResult.ok) {
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
           Pagina inicial
         </Link>
         <Link
-          href="/auth/logout"
+          href="/auth/logout?returnTo=/"
           className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
         >
           Sair

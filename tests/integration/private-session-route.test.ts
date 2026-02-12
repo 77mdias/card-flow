@@ -2,13 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AppUserDto } from "@/lib/types/user";
 
-const getSessionMock = vi.fn();
+const getAuthSessionFromRequestMock = vi.fn();
 const synchronizeFromSessionMock = vi.fn();
 
-vi.mock("@/lib/auth0", () => ({
-  auth0: {
-    getSession: getSessionMock,
-  },
+vi.mock("@/lib/auth-session", () => ({
+  getAuthSessionFromRequest: getAuthSessionFromRequestMock,
 }));
 
 vi.mock("@/server/services/auth-service", () => ({
@@ -35,14 +33,14 @@ function buildUser(overrides: Partial<AppUserDto> = {}): AppUserDto {
 
 describe("GET /api/private/session", () => {
   beforeEach(() => {
-    getSessionMock.mockReset();
+    getAuthSessionFromRequestMock.mockReset();
     synchronizeFromSessionMock.mockReset();
   });
 
   it("retorna nao autorizado quando sessao e invalida", async () => {
     const { GET } = await import("@/app/api/private/session/route");
 
-    getSessionMock.mockResolvedValue(null);
+    getAuthSessionFromRequestMock.mockResolvedValue(null);
     synchronizeFromSessionMock.mockResolvedValue({
       ok: false,
       code: "UNAUTHENTICATED",
@@ -65,11 +63,11 @@ describe("GET /api/private/session", () => {
   it("retorna sucesso com sessao valida", async () => {
     const { GET } = await import("@/app/api/private/session/route");
 
-    getSessionMock.mockResolvedValue({
+    getAuthSessionFromRequestMock.mockResolvedValue({
       user: {
-        sub: "auth0|abc",
+        id: "user_abc",
         email: "user@cardflow.app",
-        email_verified: true,
+        emailVerified: true,
       },
     });
 
@@ -90,11 +88,11 @@ describe("GET /api/private/session", () => {
   it("retorna proibido para usuario inativo", async () => {
     const { GET } = await import("@/app/api/private/session/route");
 
-    getSessionMock.mockResolvedValue({
+    getAuthSessionFromRequestMock.mockResolvedValue({
       user: {
-        sub: "auth0|abc",
+        id: "user_abc",
         email: "inactive@cardflow.app",
-        email_verified: true,
+        emailVerified: true,
       },
     });
 
@@ -119,11 +117,11 @@ describe("GET /api/private/session", () => {
   it("retorna email nao verificado quando faltou confirmacao", async () => {
     const { GET } = await import("@/app/api/private/session/route");
 
-    getSessionMock.mockResolvedValue({
+    getAuthSessionFromRequestMock.mockResolvedValue({
       user: {
-        sub: "auth0|abc",
+        id: "user_abc",
         email: "pending@cardflow.app",
-        email_verified: false,
+        emailVerified: false,
       },
     });
 

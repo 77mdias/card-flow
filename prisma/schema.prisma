@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -26,4 +27,67 @@ model User {
   deletedAt     DateTime?  @map("deleted_at")
 
   @@map("users")
+}
+
+model Auth_users {
+  id             String          @id
+  name           String
+  email          String
+  emailVerified  Boolean         @default(false)
+  image          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  auth_sessionss Auth_sessions[]
+  auth_accountss Auth_accounts[]
+
+  @@unique([email])
+  @@map("auth_users")
+}
+
+model Auth_sessions {
+  id         String     @id
+  expiresAt  DateTime
+  token      String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  ipAddress  String?
+  userAgent  String?
+  userId     String
+  auth_users Auth_users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("auth_sessions")
+}
+
+model Auth_accounts {
+  id                    String     @id
+  accountId             String
+  providerId            String
+  userId                String
+  auth_users            Auth_users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  @@index([userId])
+  @@map("auth_accounts")
+}
+
+model Auth_verifications {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("auth_verifications")
 }

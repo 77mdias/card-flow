@@ -1,35 +1,22 @@
 import { test, expect } from "@playwright/test";
 
-const hasAuthCredentials = Boolean(
-  process.env.E2E_AUTH0_EMAIL && process.env.E2E_AUTH0_PASSWORD,
-);
+const hasAuthCredentials = Boolean(process.env.E2E_AUTH_EMAIL && process.env.E2E_AUTH_PASSWORD);
 
-test.describe("Auth0 user lifecycle", () => {
-  test.skip(
-    !hasAuthCredentials,
-    "Defina E2E_AUTH0_EMAIL e E2E_AUTH0_PASSWORD para executar os cenarios reais de Auth0.",
-  );
+test.describe("Better Auth user lifecycle", () => {
+  test.skip(!hasAuthCredentials, "Defina E2E_AUTH_EMAIL e E2E_AUTH_PASSWORD para executar os cenarios reais.");
 
   test("login -> dashboard -> logout", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("link", { name: "Entrar com Auth0" }).click();
+    await page.getByRole("link", { name: "Entrar" }).click();
 
-    await page
-      .locator('input[name="username"], input[type="email"]')
-      .first()
-      .fill(process.env.E2E_AUTH0_EMAIL!);
-    await page
-      .locator('input[name="password"], input[type="password"]')
-      .first()
-      .fill(process.env.E2E_AUTH0_PASSWORD!);
+    await page.locator('input[name="username"], input[type="email"]').first().fill(process.env.E2E_AUTH_EMAIL!);
+    await page.locator('input[name="password"], input[type="password"]').first().fill(process.env.E2E_AUTH_PASSWORD!);
 
-    await page.getByRole("button", { name: /continuar|continue|log in|entrar/i }).click();
+    await page.getByRole("button", { name: /entrar/i }).click();
 
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(
-      page.getByRole("heading", { name: "Dashboard inicial" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Dashboard inicial" })).toBeVisible();
 
     await page.getByRole("link", { name: "Sair" }).click();
     await expect(page).toHaveURL(/\/$/);
@@ -42,18 +29,12 @@ test.describe("Auth0 user lifecycle", () => {
     );
 
     await page.goto("/");
-    await page.getByRole("link", { name: "Entrar com Auth0" }).click();
+    await page.getByRole("link", { name: "Entrar" }).click();
 
-    await page
-      .locator('input[name="username"], input[type="email"]')
-      .first()
-      .fill(process.env.E2E_AUTH0_EMAIL!);
-    await page
-      .locator('input[name="password"], input[type="password"]')
-      .first()
-      .fill(process.env.E2E_AUTH0_PASSWORD!);
+    await page.locator('input[name="username"], input[type="email"]').first().fill(process.env.E2E_AUTH_EMAIL!);
+    await page.locator('input[name="password"], input[type="password"]').first().fill(process.env.E2E_AUTH_PASSWORD!);
 
-    await page.getByRole("button", { name: /continuar|continue|log in|entrar/i }).click();
+    await page.getByRole("button", { name: /entrar/i }).click();
 
     await expect(page).toHaveURL(/\/account-blocked/);
     await expect(page.getByRole("heading", { name: "Conta sem acesso" })).toBeVisible();

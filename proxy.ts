@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse } from "next/server";
-
-import { auth0 } from "@/lib/auth0";
 
 const privatePathPrefixes = ["/dashboard", "/api/private"];
 
@@ -10,19 +9,13 @@ function isPrivatePath(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  const authResponse = await auth0.middleware(request);
-
-  if (request.nextUrl.pathname.startsWith("/auth")) {
-    return authResponse;
-  }
-
   if (!isPrivatePath(request.nextUrl.pathname)) {
-    return authResponse;
+    return NextResponse.next();
   }
 
-  const session = await auth0.getSession(request);
-  if (session) {
-    return authResponse;
+  const sessionToken = getSessionCookie(request);
+  if (sessionToken) {
+    return NextResponse.next();
   }
 
   const returnTo = `${request.nextUrl.pathname}${request.nextUrl.search}`;
@@ -33,5 +26,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/auth/:path*", "/dashboard/:path*", "/api/private/:path*"],
+  matcher: ["/dashboard/:path*", "/api/private/:path*"],
 };

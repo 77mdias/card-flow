@@ -1,19 +1,18 @@
-import type { SessionData } from "@auth0/nextjs-auth0/types";
 import { describe, expect, it, vi } from "vitest";
 
 import type { AppUserDto } from "@/lib/types/user";
-import { createAuthService } from "@/server/services/auth-service";
 import type { UsersRepository } from "@/server/repos/users-repo";
+import { createAuthService } from "@/server/services/auth-service";
 
-function buildSession(overrides: Partial<SessionData["user"]> = {}): SessionData {
+function buildSession(overrides: Record<string, unknown> = {}) {
   return {
     user: {
-      sub: "auth0|user_123",
+      id: "user_123",
       email: "owner@cardflow.app",
-      email_verified: true,
+      emailVerified: true,
       ...overrides,
     },
-  } as SessionData;
+  };
 }
 
 function buildUser(overrides: Partial<AppUserDto> = {}): AppUserDto {
@@ -34,6 +33,7 @@ describe("authService.synchronizeFromSession", () => {
 
     const repository: UsersRepository = {
       upsertFromAuthIdentity: vi.fn().mockResolvedValue(buildUser()),
+      deleteByAuthSubject: vi.fn(),
     };
 
     const service = createAuthService({
@@ -45,8 +45,8 @@ describe("authService.synchronizeFromSession", () => {
 
     expect(result.ok).toBe(true);
     expect(repository.upsertFromAuthIdentity).toHaveBeenCalledWith({
-      authProvider: "auth0",
-      authSubject: "auth0|user_123",
+      authProvider: "better-auth",
+      authSubject: "user_123",
       email: "owner@cardflow.app",
       emailVerified: true,
       loginAt: fixedNow,
@@ -70,6 +70,7 @@ describe("authService.synchronizeFromSession", () => {
             lastLoginAt: recurringLogin,
           }),
         ),
+      deleteByAuthSubject: vi.fn(),
     };
 
     const service = createAuthService({
@@ -94,6 +95,7 @@ describe("authService.synchronizeFromSession", () => {
         .fn()
         .mockResolvedValueOnce(buildUser({ status: "INACTIVE" }))
         .mockResolvedValueOnce(buildUser({ status: "DELETED" })),
+      deleteByAuthSubject: vi.fn(),
     };
 
     const service = createAuthService({

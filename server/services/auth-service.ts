@@ -1,20 +1,10 @@
 import "server-only";
 
-import type { SessionData } from "@auth0/nextjs-auth0/types";
-
 import type { AppUserDto } from "@/lib/types/user";
 import { authSessionUserSchema } from "@/lib/validation/auth-session";
-import {
-  usersRepository,
-  type UsersRepository,
-} from "@/server/repos/users-repo";
+import { usersRepository, type UsersRepository } from "@/server/repos/users-repo";
 
-export type AuthFailureCode =
-  | "UNAUTHENTICATED"
-  | "INVALID_SESSION"
-  | "EMAIL_NOT_VERIFIED"
-  | "INACTIVE"
-  | "DELETED";
+export type AuthFailureCode = "UNAUTHENTICATED" | "INVALID_SESSION" | "EMAIL_NOT_VERIFIED" | "INACTIVE" | "DELETED";
 
 export type AuthSyncResult =
   | {
@@ -29,7 +19,7 @@ export type AuthSyncResult =
     };
 
 export interface AuthService {
-  synchronizeFromSession(session: SessionData | null): Promise<AuthSyncResult>;
+  synchronizeFromSession(session: unknown): Promise<AuthSyncResult>;
 }
 
 interface AuthServiceDependencies {
@@ -39,7 +29,16 @@ interface AuthServiceDependencies {
 
 function getAuthProvider(subject: string): string {
   const [provider] = subject.split("|");
-  return provider || "auth0";
+
+  if (!provider) {
+    return "better-auth";
+  }
+
+  if (!subject.includes("|")) {
+    return "better-auth";
+  }
+
+  return provider;
 }
 
 function getBlockedMessage(code: "INACTIVE" | "DELETED"): string {
@@ -50,17 +49,15 @@ function getBlockedMessage(code: "INACTIVE" | "DELETED"): string {
   return "Sua conta foi removida. Entre em contato com o suporte para orientacoes.";
 }
 
-export function createAuthService(
-  overrides: Partial<AuthServiceDependencies> = {},
-): AuthService {
+export function createAuthService(overrides: Partial<AuthServiceDependencies> = {}): AuthService {
   const deps: AuthServiceDependencies = {
     usersRepository: overrides.usersRepository ?? usersRepository,
     now: overrides.now ?? (() => new Date()),
   };
 
   return {
-    async synchronizeFromSession(session: SessionData | null): Promise<AuthSyncResult> {
-      if (!session?.user) {
+    async synchronizeFromSession(session: unknown): Promise<AuthSyncResult> {
+      if (!session || typeof session !== "object" || !("user" in session)) {
         return {
           ok: false,
           code: "UNAUTHENTICATED",
@@ -69,7 +66,7 @@ export function createAuthService(
         };
       }
 
-      const parsedUser = authSessionUserSchema.safeParse(session.user);
+      const parsedUser = authSessionUserSchema.safeParse((session as { user?: unknown }).user);
       if (!parsedUser.success) {
         return {
           ok: false,
@@ -80,7 +77,7 @@ export function createAuthService(
       }
 
       const sessionUser = parsedUser.data;
-      if (!sessionUser.email_verified) {
+      if (!sessionUser.emailVerified) {
         return {
           ok: false,
           code: "EMAIL_NOT_VERIFIED",
@@ -90,10 +87,10 @@ export function createAuthService(
       }
 
       const syncedUser = await deps.usersRepository.upsertFromAuthIdentity({
-        authProvider: getAuthProvider(sessionUser.sub),
-        authSubject: sessionUser.sub,
+        authProvider: getAuthProvider(sessionUser.subject),
+        authSubject: sessionUser.subject,
         email: sessionUser.email.toLowerCase(),
-        emailVerified: sessionUser.email_verified,
+        emailVerified: sessionUser.emailVerified,
         loginAt: deps.now(),
       });
 

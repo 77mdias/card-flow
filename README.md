@@ -1,13 +1,12 @@
 # CardFlow
 
-Fundacao do MVP com Next.js App Router, Auth0 e Prisma (Neon Postgres).
+Fundacao do MVP com Next.js App Router, Better Auth e Prisma (Neon Postgres).
 
 ## Requisitos
 
 - Node.js 20+
 - Bun 1.1+
 - Banco Postgres (Neon recomendado)
-- Tenant Auth0 configurado com callback/logout URLs
 
 ## Setup rapido
 
@@ -41,6 +40,19 @@ Convencao usada no projeto:
 - `DATABASE_URL`: runtime da aplicacao (queries do Prisma Client em requests).
 - `DIRECT_URL`: migrations e comandos admin (`migrate`, `status`, `studio`).
 
+Para autenticacao e verificacao de email via Better Auth + Nodemailer, configure:
+
+```env
+BETTER_AUTH_SECRET="use-openssl-rand-hex-32"
+SMTP_HOST="smtp.provider.com"
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER="smtp-username"
+SMTP_PASS="smtp-password"
+SMTP_FROM="CardFlow <noreply@77code.com.br>"
+SMTP_REPLY_TO="suporte@77code.com.br"
+```
+
 3. Gere o client do Prisma:
 
 ```bash
@@ -73,14 +85,38 @@ bun run dev
 - `bun run prisma:migrate:deploy`: aplica migration em ambiente alvo
 - `bun run prisma:migrate:status`: status das migrations no banco alvo
 - `bun run prisma:studio`: abre Prisma Studio
+- `bun run auth:schema:generate`: regenera modelos de auth no `schema.prisma` via Better Auth CLI
 
 ## Fluxo de autenticacao
 
 - Login: `/auth/login`
-- Logout: `/auth/logout`
-- Callback: `/auth/callback`
+- Cadastro: `/auth/register`
+- Logout: `/auth/logout?returnTo=/`
 - Pagina privada principal: `/dashboard`
+- Rotas da API de auth: `/api/auth/*`
 - Endpoint privado de sessao: `/api/private/session`
+- Pagina de email pendente: `/email-verification-required` (com reenvio via backend)
+- Endpoint privado de exclusao sincronizada de conta: `DELETE /api/private/account` (remocao no Better Auth + banco local)
+
+## Prisma + Better Auth
+
+O schema de auth foi gerado pelo Better Auth CLI com `lib/auth-cli.ts` e inclui:
+- `auth_users`
+- `auth_sessions`
+- `auth_accounts`
+- `auth_verifications`
+
+Se precisar regenerar o schema de auth:
+
+```bash
+bunx @better-auth/cli@latest generate --config lib/auth-cli.ts --yes
+```
+
+Depois rode migration normalmente:
+
+```bash
+bun run prisma:migrate:dev
+```
 
 ## Observacoes de seguranca
 

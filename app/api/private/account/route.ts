@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getAuthSessionFromRequest } from "@/lib/auth-session";
 import { logAuthEvent } from "@/server/observability/auth-events";
-import { authService } from "@/server/services/auth-service";
+import { accountDeletionService } from "@/server/services/account-deletion-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -12,37 +12,37 @@ function toNoStoreResponse(response: NextResponse): NextResponse {
   return response;
 }
 
-export async function GET(request: Request) {
+export async function DELETE(request: Request) {
   const startedAt = Date.now();
   const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
 
   const session = await getAuthSessionFromRequest(request);
-  const authResult = await authService.synchronizeFromSession(session);
+  const deletionResult = await accountDeletionService.deleteAuthenticatedAccount(session, request.headers);
   const durationMs = Date.now() - startedAt;
 
-  if (!authResult.ok) {
+  if (!deletionResult.ok) {
     logAuthEvent({
-      route: "/api/private/session",
+      route: "/api/private/account",
       requestId,
       result: "failure",
       durationMs,
-      reason: authResult.code,
+      reason: deletionResult.code,
     });
 
     return toNoStoreResponse(
       NextResponse.json(
         {
           ok: false,
-          error: authResult.code,
-          message: authResult.message,
+          error: deletionResult.code,
+          message: deletionResult.message,
         },
-        { status: authResult.status },
+        { status: deletionResult.status },
       ),
     );
   }
 
   logAuthEvent({
-    route: "/api/private/session",
+    route: "/api/private/account",
     requestId,
     result: "success",
     durationMs,
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
   return toNoStoreResponse(
     NextResponse.json({
       ok: true,
-      data: authResult.data,
+      data: deletionResult.data,
     }),
   );
 }
