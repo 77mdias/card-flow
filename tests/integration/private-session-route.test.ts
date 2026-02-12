@@ -115,4 +115,33 @@ describe("GET /api/private/session", () => {
       message: "Sua conta esta inativa.",
     });
   });
+
+  it("retorna email nao verificado quando faltou confirmacao", async () => {
+    const { GET } = await import("@/app/api/private/session/route");
+
+    getSessionMock.mockResolvedValue({
+      user: {
+        sub: "auth0|abc",
+        email: "pending@cardflow.app",
+        email_verified: false,
+      },
+    });
+
+    synchronizeFromSessionMock.mockResolvedValue({
+      ok: false,
+      code: "EMAIL_NOT_VERIFIED",
+      status: 403,
+      message: "Confirme seu email para acessar o CardFlow.",
+    });
+
+    const response = await GET(new Request("http://localhost/api/private/session"));
+    const payload = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(payload).toEqual({
+      ok: false,
+      error: "EMAIL_NOT_VERIFIED",
+      message: "Confirme seu email para acessar o CardFlow.",
+    });
+  });
 });

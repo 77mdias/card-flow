@@ -5,8 +5,8 @@
 - titulo: Fundacao de autenticacao com Auth0 e ciclo inicial de usuario
 - tipo: feature
 - prioridade: P0
-- status: ready
-- owner: unassigned
+- status: done
+- owner: engineering
 - sprint: Sprint 01 - Base + Auth
 - criado_em: 2026-02-12
 - atualizado_em: 2026-02-12
@@ -113,12 +113,12 @@
   - Usuario `DELETED` no banco local (deve negar acesso mesmo autenticado no provedor).
 
 ## 10. Criterios de aceite
-- [ ] Fluxo Auth0 (login/logout/callback/session) funcional no App Router.
-- [ ] Rotas privadas protegidas por middleware e verificacao server-side.
-- [ ] Registro interno de usuario criado/sincronizado com `status` e `last_login_at`.
-- [ ] Bloqueio de acesso para `INACTIVE` e `DELETED` aplicado no servidor.
-- [ ] Validacao de env vars obrigatorias implementada.
-- [ ] Cobertura minima: unit + integration + e2e do fluxo critico de auth.
+- [x] Fluxo Auth0 (login/logout/callback/session) funcional no App Router.
+- [x] Rotas privadas protegidas por middleware e verificacao server-side.
+- [x] Registro interno de usuario criado/sincronizado com `status` e `last_login_at`.
+- [x] Bloqueio de acesso para `INACTIVE` e `DELETED` aplicado no servidor.
+- [x] Validacao de env vars obrigatorias implementada.
+- [x] Cobertura minima: unit + integration + e2e do fluxo critico de auth.
 
 ## 11. Riscos e rollback
 - riscos:
@@ -139,5 +139,16 @@
 - [x] Sem quebra de boundary server/client
 - [x] Validacao + authz server-side
 - [x] Cache/revalidacao explicitos
-- [ ] Testes atualizados
+- [x] Testes atualizados
 - [x] Docs atualizadas
+
+## 13. Evidencias de entrega
+- Integracao Auth0 centralizada: `lib/auth0.ts`.
+- Validacao de env no startup: `lib/validation/env.ts` e `lib/env.ts`.
+- Modelo e migration inicial de users: `prisma/schema.prisma` e `prisma/migrations/20260212170000_init_users/migration.sql`.
+- Sincronizacao de usuario e update de `last_login_at`: `server/repos/users-repo.ts` e `server/services/auth-service.ts`.
+- Protecao de rotas privadas no servidor: `proxy.ts`, `app/dashboard/page.tsx`, `app/api/private/session/route.ts`.
+- Resposta segura para conta bloqueada: `app/account-blocked/page.tsx`.
+- Testes unit e integration: `tests/unit/auth-service.test.ts` e `tests/integration/private-session-route.test.ts`.
+- E2E do fluxo critico de auth: `tests/e2e/auth-flow.spec.ts` (requer credenciais Auth0 no ambiente para execucao real).
+- Validacao local executada: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run build`.

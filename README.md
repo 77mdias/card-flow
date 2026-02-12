@@ -23,6 +23,13 @@ bun install
 cp .env.example .env.local
 ```
 
+Para Neon (pooler), mantenha `DATABASE_URL` com `connect_timeout` para reduzir falhas
+intermitentes em comandos do Prisma (`migrate`, `status`, `studio`), por exemplo:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require&channel_binding=require&connect_timeout=15"
+```
+
 3. Gere o client do Prisma:
 
 ```bash

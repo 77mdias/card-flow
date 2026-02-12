@@ -11,9 +11,9 @@
     "test": "vitest run tests",
     "test:watch": "vitest tests",
     "test:e2e": "playwright test",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate:dev": "prisma migrate dev",
-    "prisma:migrate:deploy": "prisma migrate deploy"
+    "prisma:generate": "bun --env-file=.env.local prisma generate",
+    "prisma:migrate:dev": "bun --env-file=.env.local prisma migrate dev",
+    "prisma:migrate:deploy": "bun --env-file=.env.local prisma migrate deploy"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.15.0",

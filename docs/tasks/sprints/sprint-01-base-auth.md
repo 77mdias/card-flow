@@ -3,6 +3,11 @@
 ## Objetivo
 Estabelecer fundacao tecnica e autenticacao segura com Auth0.
 
+## Status
+- concluido em 2026-02-12.
+- task entregue: `docs/tasks/development/task-s01-001-auth0-base-user-lifecycle.md`.
+- documentacao da feature: `docs/tasks/development/task-s01-001-auth0-base-user-lifecycle-features.md`.
+
 ## Escopo
 - setup inicial de arquitetura de pastas.
 - integracao Auth0 (login/logout/callback/session).

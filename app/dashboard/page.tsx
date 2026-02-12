@@ -12,11 +12,12 @@ export default async function DashboardPage() {
   const authResult = await authService.synchronizeFromSession(session);
 
   if (!authResult.ok) {
-    if (
-      authResult.code === "UNAUTHENTICATED" ||
-      authResult.code === "INVALID_SESSION"
-    ) {
+    if (authResult.code === "UNAUTHENTICATED" || authResult.code === "INVALID_SESSION") {
       redirect("/auth/login?returnTo=/dashboard");
+    }
+
+    if (authResult.code === "EMAIL_NOT_VERIFIED") {
+      redirect("/email-verification-required");
     }
 
     redirect("/account-blocked");
