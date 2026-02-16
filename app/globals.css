@@ -1,26 +1,98 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #f5f7fb;
+  --foreground: #101828;
+  --card: #ffffff;
+  --muted: #eef2f6;
+  --muted-foreground: #475467;
+  --border: #d0d5dd;
+  --input: #ffffff;
+  --primary: #0f172a;
+  --primary-foreground: #f8fafc;
+  --primary-hover: #1e293b;
+  --success-bg: #ecfdf3;
+  --success-border: #a6f4c5;
+  --success-foreground: #067647;
+  --danger-bg: #fef3f2;
+  --danger-border: #fecdca;
+  --danger-foreground: #b42318;
+  --ring: #344054;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0b1220;
+  --foreground: #f2f4f7;
+  --card: #111927;
+  --muted: #1f2937;
+  --muted-foreground: #98a2b3;
+  --border: #344054;
+  --input: #111927;
+  --primary: #f2f4f7;
+  --primary-foreground: #101828;
+  --primary-hover: #d0d5dd;
+  --success-bg: #052e21;
+  --success-border: #0e5f43;
+  --success-foreground: #75e0a7;
+  --danger-bg: #3b0d0e;
+  --danger-border: #7a271a;
+  --danger-foreground: #fda29b;
+  --ring: #98a2b3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-success-bg: var(--success-bg);
+  --color-success-border: var(--success-border);
+  --color-success-foreground: var(--success-foreground);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --background: #0b1220;
+    --foreground: #f2f4f7;
+    --card: #111927;
+    --muted: #1f2937;
+    --muted-foreground: #98a2b3;
+    --border: #344054;
+    --input: #111927;
+    --primary: #f2f4f7;
+    --primary-foreground: #101828;
+    --primary-hover: #d0d5dd;
+    --success-bg: #052e21;
+    --success-border: #0e5f43;
+    --success-foreground: #75e0a7;
+    --danger-bg: #3b0d0e;
+    --danger-border: #7a271a;
+    --danger-foreground: #fda29b;
+    --ring: #98a2b3;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }

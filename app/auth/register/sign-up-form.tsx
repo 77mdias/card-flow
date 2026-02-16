@@ -84,29 +84,29 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm text-zinc-700">
+      <label className="flex flex-col gap-1 text-sm text-muted-foreground">
         Nome
         <input
           type="text"
           name="name"
           required
           autoComplete="name"
-          className="rounded-md border border-zinc-300 px-3 py-2 text-zinc-900"
+          className="rounded-md border border-border bg-input px-3 py-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm text-zinc-700">
+      <label className="flex flex-col gap-1 text-sm text-muted-foreground">
         Email
         <input
           type="email"
           name="email"
           required
           autoComplete="email"
-          className="rounded-md border border-zinc-300 px-3 py-2 text-zinc-900"
+          className="rounded-md border border-border bg-input px-3 py-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-sm text-zinc-700">
+      <label className="flex flex-col gap-1 text-sm text-muted-foreground">
         Senha
         <input
           type="password"
@@ -114,23 +114,23 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
           required
           minLength={8}
           autoComplete="new-password"
-          className="rounded-md border border-zinc-300 px-3 py-2 text-zinc-900"
+          className="rounded-md border border-border bg-input px-3 py-2 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
       </label>
 
       {errorMessage ? (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{errorMessage}</p>
+        <p className="rounded-md border border-danger-border bg-danger-bg px-3 py-2 text-sm text-danger-foreground">{errorMessage}</p>
       ) : null}
 
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? "Criando conta..." : "Criar conta"}
       </button>
 
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-muted-foreground">
         Ja possui conta?{" "}
         <Link href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`} className="underline">
           Entrar

@@ -65,19 +65,19 @@ export default async function EmailVerificationPage({
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-6 px-6 py-12">
       <header className="space-y-2">
-        <p className="text-sm uppercase tracking-wide text-zinc-500">CardFlow</p>
-        <h1 className="text-3xl font-semibold text-zinc-900">Verifique seu email</h1>
-        <p className="max-w-2xl text-base text-zinc-700">{buildIntroMessage(source)}</p>
+        <p className="text-sm uppercase tracking-wide text-muted-foreground/80">CardFlow</p>
+        <h1 className="text-3xl font-semibold text-foreground">Verifique seu email</h1>
+        <p className="max-w-2xl text-base text-muted-foreground">{buildIntroMessage(source)}</p>
       </header>
 
-      <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <p className="text-sm text-zinc-700">
+      <section className="space-y-3 rounded-xl border border-border bg-card p-6 shadow-sm">
+        <p className="text-sm text-muted-foreground">
           1. Abra o email enviado para sua conta.
         </p>
-        <p className="text-sm text-zinc-700">
+        <p className="text-sm text-muted-foreground">
           2. Clique no link de verificacao para concluir o acesso.
         </p>
-        <p className="text-sm text-zinc-700">
+        <p className="text-sm text-muted-foreground">
           3. Se o link expirar, reenvie um novo email abaixo.
         </p>
       </section>
@@ -90,13 +90,13 @@ export default async function EmailVerificationPage({
       <div className="flex flex-wrap items-center gap-4">
         <Link
           href={loginHref}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover"
         >
           Ir para login
         </Link>
         <Link
           href="/"
-          className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+          className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
         >
           Voltar ao inicio
         </Link>

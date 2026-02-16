@@ -12,9 +12,9 @@ export default async function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center gap-8 px-6 py-12">
       <header className="space-y-3">
-        <p className="text-sm uppercase tracking-wide text-zinc-500">CardFlow</p>
-        <h1 className="text-4xl font-semibold text-zinc-900">Fundacao de autenticacao e ciclo de usuario</h1>
-        <p className="max-w-2xl text-base text-zinc-700">
+        <p className="text-sm uppercase tracking-wide text-muted-foreground/80">CardFlow</p>
+        <h1 className="text-4xl font-semibold text-foreground">Fundacao de autenticacao e ciclo de usuario</h1>
+        <p className="max-w-2xl text-base text-muted-foreground">
           Base inicial do MVP com Better Auth, sessao server-side e sincronizacao de usuario interno.
         </p>
       </header>
@@ -24,13 +24,13 @@ export default async function HomePage() {
           <>
             <Link
               href="/dashboard"
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover"
             >
               Ir para dashboard
             </Link>
             <Link
               href="/auth/logout?returnTo=/"
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               Sair
             </Link>
@@ -38,7 +38,7 @@ export default async function HomePage() {
         ) : (
           <Link
             href="/auth/login?returnTo=/dashboard"
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover"
           >
             Entrar
           </Link>
