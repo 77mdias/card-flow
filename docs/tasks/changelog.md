@@ -35,6 +35,10 @@ Formato baseado em Keep a Changelog e semver quando aplicavel.
   - refatoracao de servicos de sessao, verificacao de email e exclusao de conta para Better Auth;
   - nota de conflito: decisao de produto migrou do stack anterior (Auth0) para Better Auth;
   - remocao de dependencias e modulos legados do Auth0.
+- Complemento de UX do Sprint 01 com paginas dedicadas de autenticacao:
+  - fluxo completo de verificacao de email (`/auth/email-verification`, `/auth/email-verification/complete`, `/auth/email-verification/error`);
+  - pagina dedicada para erro de conexao (`/auth/error/connection`);
+  - redirecionamentos de login/cadastro para telas de status e erro.
 
 ## [0.1.0] - 2026-02-12
 

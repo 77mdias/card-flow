@@ -9,7 +9,8 @@ import {
   type BetterAuthRepository,
 } from "@/server/repos/better-auth-repo";
 
-const EMAIL_VERIFICATION_RESULT_PATH = "/dashboard";
+const DEFAULT_VERIFICATION_RETURN_TO = "/dashboard";
+const EMAIL_VERIFICATION_RESULT_PATH = "/auth/email-verification/complete";
 const EMAIL_VERIFICATION_RESEND_MAX_ATTEMPTS = 3;
 const EMAIL_VERIFICATION_RESEND_WINDOW_MS = 10 * 60 * 1000;
 
@@ -32,6 +33,7 @@ interface VerificationEmailServiceDependencies {
 
 export interface VerificationEmailService {
   sendVerificationEmail(session: unknown): Promise<SendVerificationEmailResult>;
+  sendVerificationEmailByEmail(input: { email: string; returnTo?: string }): Promise<SendVerificationEmailResult>;
 }
 
 const globalForEmailVerificationRateLimit = globalThis as unknown as {
@@ -39,12 +41,10 @@ const globalForEmailVerificationRateLimit = globalThis as unknown as {
 };
 
 const emailVerificationResendAttempts =
-  globalForEmailVerificationRateLimit.emailVerificationResendAttempts ??
-  new Map<string, number[]>();
+  globalForEmailVerificationRateLimit.emailVerificationResendAttempts ?? new Map<string, number[]>();
 
 if (process.env.NODE_ENV !== "production") {
-  globalForEmailVerificationRateLimit.emailVerificationResendAttempts =
-    emailVerificationResendAttempts;
+  globalForEmailVerificationRateLimit.emailVerificationResendAttempts = emailVerificationResendAttempts;
 }
 
 function createInMemoryRateLimiter(
@@ -88,6 +88,21 @@ function resolveVerificationEmailConfig(): VerificationEmailServiceConfig | null
   };
 }
 
+function resolveReturnTo(returnTo: string | undefined): string {
+  if (!returnTo || !returnTo.startsWith("/")) {
+    return DEFAULT_VERIFICATION_RETURN_TO;
+  }
+
+  return returnTo;
+}
+
+function buildVerificationResultUrl(config: VerificationEmailServiceConfig, returnTo: string | undefined): string {
+  const callbackUrl = new URL(config.verificationResultPath, config.appBaseUrl);
+  callbackUrl.searchParams.set("returnTo", resolveReturnTo(returnTo));
+
+  return callbackUrl.toString();
+}
+
 function buildRateLimitMessage(retryAfterSeconds?: number): string {
   if (!retryAfterSeconds || retryAfterSeconds <= 0) {
     return "Muitas tentativas de reenvio. Aguarde alguns instantes e tente novamente.";
@@ -100,16 +115,12 @@ export function createVerificationEmailService(
   overrides: Partial<VerificationEmailServiceDependencies> = {},
 ): VerificationEmailService {
   const deps: VerificationEmailServiceDependencies = {
-    betterAuthRepository:
-      overrides.betterAuthRepository ?? betterAuthRepository,
+    betterAuthRepository: overrides.betterAuthRepository ?? betterAuthRepository,
     now: overrides.now ?? (() => new Date()),
     resolveConfig: overrides.resolveConfig ?? resolveVerificationEmailConfig,
     checkRateLimit:
       overrides.checkRateLimit ??
-      createInMemoryRateLimiter(
-        EMAIL_VERIFICATION_RESEND_MAX_ATTEMPTS,
-        EMAIL_VERIFICATION_RESEND_WINDOW_MS,
-      ),
+      createInMemoryRateLimiter(EMAIL_VERIFICATION_RESEND_MAX_ATTEMPTS, EMAIL_VERIFICATION_RESEND_WINDOW_MS),
   };
 
   return {
@@ -123,9 +134,7 @@ export function createVerificationEmailService(
         };
       }
 
-      const parsedUser = authSessionUserSchema.safeParse(
-        (session as { user?: unknown }).user,
-      );
+      const parsedUser = authSessionUserSchema.safeParse((session as { user?: unknown }).user);
       if (!parsedUser.success) {
         return {
           ok: false,
@@ -167,10 +176,7 @@ export function createVerificationEmailService(
         };
       }
 
-      const verificationResultUrl = new URL(
-        config.verificationResultPath,
-        config.appBaseUrl,
-      ).toString();
+      const verificationResultUrl = buildVerificationResultUrl(config, DEFAULT_VERIFICATION_RETURN_TO);
 
       try {
         await deps.betterAuthRepository.sendVerificationEmail({
@@ -187,6 +193,56 @@ export function createVerificationEmailService(
           };
         }
 
+        return {
+          ok: false,
+          code: "EMAIL_DELIVERY_FAILED",
+          status: 502,
+          message: "Nao foi possivel enviar o email de verificacao no momento.",
+        };
+      }
+
+      return {
+        ok: true,
+        data: {
+          sentAt: deps.now(),
+        },
+      };
+    },
+    async sendVerificationEmailByEmail(input: {
+      email: string;
+      returnTo?: string;
+    }): Promise<SendVerificationEmailResult> {
+      const config = deps.resolveConfig();
+      if (!config) {
+        return {
+          ok: false,
+          code: "NOT_CONFIGURED",
+          status: 503,
+          message: "Reenvio indisponivel no momento. Tente novamente mais tarde.",
+        };
+      }
+
+      const email = input.email.trim().toLowerCase();
+      const nowMs = deps.now().getTime();
+      const rateLimitResult = deps.checkRateLimit(`email:${email}`, nowMs);
+      if (!rateLimitResult.allowed) {
+        return {
+          ok: false,
+          code: "RATE_LIMITED",
+          status: 429,
+          message: buildRateLimitMessage(rateLimitResult.retryAfterSeconds),
+          retryAfterSeconds: rateLimitResult.retryAfterSeconds,
+        };
+      }
+
+      const verificationResultUrl = buildVerificationResultUrl(config, input.returnTo);
+
+      try {
+        await deps.betterAuthRepository.sendVerificationEmail({
+          email,
+          callbackURL: verificationResultUrl,
+        });
+      } catch {
         return {
           ok: false,
           code: "EMAIL_DELIVERY_FAILED",

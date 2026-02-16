@@ -65,7 +65,7 @@ describe("verificationEmailService.sendVerificationEmail", () => {
     const service = createVerificationEmailService({
       resolveConfig: () => ({
         appBaseUrl: "http://localhost:3000",
-        verificationResultPath: "/dashboard",
+        verificationResultPath: "/auth/email-verification/complete",
       }),
       checkRateLimit: () => ({
         allowed: false,
@@ -95,7 +95,7 @@ describe("verificationEmailService.sendVerificationEmail", () => {
       now: () => fixedNow,
       resolveConfig: () => ({
         appBaseUrl: "http://localhost:3000",
-        verificationResultPath: "/dashboard",
+        verificationResultPath: "/auth/email-verification/complete",
       }),
       checkRateLimit: () => ({
         allowed: true,
@@ -113,7 +113,7 @@ describe("verificationEmailService.sendVerificationEmail", () => {
 
     expect(sendVerificationEmailMock).toHaveBeenCalledWith({
       email: "user@cardflow.app",
-      callbackURL: "http://localhost:3000/dashboard",
+      callbackURL: "http://localhost:3000/auth/email-verification/complete?returnTo=%2Fdashboard",
     });
   });
 
@@ -125,14 +125,12 @@ describe("verificationEmailService.sendVerificationEmail", () => {
         deleteCurrentUser: vi.fn(),
         sendVerificationEmail: vi
           .fn()
-          .mockRejectedValue(
-            new BetterAuthRepositoryError("SEND_VERIFICATION_EMAIL_FAILED"),
-          ),
+          .mockRejectedValue(new BetterAuthRepositoryError("SEND_VERIFICATION_EMAIL_FAILED")),
       },
       now: () => fixedNow,
       resolveConfig: () => ({
         appBaseUrl: "http://localhost:3000",
-        verificationResultPath: "/dashboard",
+        verificationResultPath: "/auth/email-verification/complete",
       }),
       checkRateLimit: () => ({
         allowed: true,
@@ -144,6 +142,43 @@ describe("verificationEmailService.sendVerificationEmail", () => {
       ok: false,
       code: "EMAIL_DELIVERY_FAILED",
       status: 502,
+    });
+  });
+
+  it("aceita reenvio por email sem sessao e aplica callback com returnTo", async () => {
+    const fixedNow = new Date("2026-02-12T19:00:00.000Z");
+    const sendVerificationEmailMock = vi.fn().mockResolvedValue(undefined);
+
+    const service = createVerificationEmailService({
+      betterAuthRepository: {
+        deleteCurrentUser: vi.fn(),
+        sendVerificationEmail: sendVerificationEmailMock,
+      },
+      now: () => fixedNow,
+      resolveConfig: () => ({
+        appBaseUrl: "http://localhost:3000",
+        verificationResultPath: "/auth/email-verification/complete",
+      }),
+      checkRateLimit: () => ({
+        allowed: true,
+      }),
+    });
+
+    const result = await service.sendVerificationEmailByEmail({
+      email: "User@CardFlow.App",
+      returnTo: "/cards",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      data: {
+        sentAt: fixedNow,
+      },
+    });
+
+    expect(sendVerificationEmailMock).toHaveBeenCalledWith({
+      email: "user@cardflow.app",
+      callbackURL: "http://localhost:3000/auth/email-verification/complete?returnTo=%2Fcards",
     });
   });
 });

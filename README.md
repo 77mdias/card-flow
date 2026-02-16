@@ -96,6 +96,11 @@ bun run dev
 - Rotas da API de auth: `/api/auth/*`
 - Endpoint privado de sessao: `/api/private/session`
 - Pagina de email pendente: `/email-verification-required` (com reenvio via backend)
+- Paginas de verificacao e erros de auth:
+  - `/auth/email-verification`
+  - `/auth/email-verification/complete`
+  - `/auth/email-verification/error`
+  - `/auth/error/connection`
 - Endpoint privado de exclusao sincronizada de conta: `DELETE /api/private/account` (remocao no Better Auth + banco local)
 
 ## Prisma + Better Auth

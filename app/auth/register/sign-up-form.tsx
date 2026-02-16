@@ -8,6 +8,10 @@ interface SignUpFormProps {
   returnTo: string;
 }
 
+function buildVerificationCallbackUrl(returnTo: string): string {
+  return `/auth/email-verification/complete?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
 function extractErrorMessage(payload: unknown): string | null {
   if (!payload || typeof payload !== "object") {
     return null;
@@ -41,7 +45,9 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
 
     const formData = new FormData(event.currentTarget);
     const name = String(formData.get("name") ?? "").trim();
-    const email = String(formData.get("email") ?? "").trim().toLowerCase();
+    const email = String(formData.get("email") ?? "")
+      .trim()
+      .toLowerCase();
     const password = String(formData.get("password") ?? "");
 
     startTransition(async () => {
@@ -55,23 +61,23 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
             name,
             email,
             password,
-            callbackURL: returnTo,
+            callbackURL: buildVerificationCallbackUrl(returnTo),
           }),
         });
 
         const payload = (await response.json().catch(() => null)) as unknown;
         if (!response.ok) {
           setErrorMessage(
-            extractErrorMessage(payload) ??
-              "Nao foi possivel criar a conta. Revise os dados e tente novamente.",
+            extractErrorMessage(payload) ?? "Nao foi possivel criar a conta. Revise os dados e tente novamente.",
           );
           return;
         }
 
-        router.push(returnTo);
-        router.refresh();
+        router.push(
+          `/auth/email-verification?email=${encodeURIComponent(email)}&returnTo=${encodeURIComponent(returnTo)}&source=register`,
+        );
       } catch {
-        setErrorMessage("Falha de rede ao criar conta. Tente novamente.");
+        router.push(`/auth/error/connection?flow=register&returnTo=${encodeURIComponent(returnTo)}`);
       }
     });
   }
@@ -113,9 +119,7 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
       </label>
 
       {errorMessage ? (
-        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {errorMessage}
-        </p>
+        <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{errorMessage}</p>
       ) : null}
 
       <button
